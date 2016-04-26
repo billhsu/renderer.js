@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>renderer.js</title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css">
+</head>
+
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <canvas id="canvas" width="800px" height="600px" style="border:1px solid #000000;">
+                Your browser does not support the HTML5 canvas tag.
+            </canvas>
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script src="js/resize.js"></script>
+    <script src="js/renderer.js"></script>
+    <script>
+    drawTrangle(new Vector2(50,0), new Vector2(50,100), new Vector2(100,100));
+    </script>
+</body>
