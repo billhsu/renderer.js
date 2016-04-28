@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+<!-- Shipeng Xu billhsu.github.io -->
 
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
@@ -19,14 +20,14 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="js/resize.js"></script>
-    <script src="js/sylvester.js"></script>
+    <script src="js/vector.js"></script>
     <script src="js/renderer.js"></script>
     <script src="js/teddy.js"></script>
     <script>
         for (var i = 0; i < teddyObj.length; i += 3 * 3) {
-            drawTrangle(new Vector2(teddyObj[i], teddyObj[i + 1]),
-                new Vector2(teddyObj[i + 3], teddyObj[i + 4]),
-                new Vector2(teddyObj[i + 6], teddyObj[i + 7]),
+            drawTrangle(new Vector(teddyObj[i], teddyObj[i + 1]),
+                new Vector(teddyObj[i + 3], teddyObj[i + 4]),
+                new Vector(teddyObj[i + 6], teddyObj[i + 7]),
                 getRandomColor());
         }
 
