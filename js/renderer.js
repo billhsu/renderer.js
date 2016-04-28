@@ -9,7 +9,7 @@ function Vector2(x, y) {
     this.y = y || 0;
 }
 
-function drawTrangle(a, b, c) {
+function drawTrangle(a, b, c, color) {
     convertVector3(a);
     convertVector3(b);
     convertVector3(c);
@@ -21,6 +21,7 @@ function drawTrangle(a, b, c) {
         ctx.lineTo(b.x, b.y);
         ctx.lineTo(c.x, c.y);
         ctx.closePath();
+        ctx.fillStyle = color;
         ctx.fill();
     }
 }

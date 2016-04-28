@@ -7,6 +7,9 @@
             $watcher.bind("resize", function() {
                 _changeCss($el, $watcher);
             });
+            $watcher.bind("load", function() {
+                _changeCss($el, $watcher);
+            });
         });
     };
 
@@ -26,4 +29,6 @@
     }
 })(jQuery);
 
-$("#canvas").verticalCenter(window);
+$(function() {
+  $("#canvas").verticalCenter(window);
+});
