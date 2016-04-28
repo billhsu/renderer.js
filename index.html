@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta http-equiv="content-type" content="text/html; charset=UTF-8">
     <title>renderer.js</title>
@@ -19,7 +20,10 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
     <script src="js/resize.js"></script>
     <script src="js/renderer.js"></script>
+    <script src="js/teddy.js"></script>
     <script>
-    drawTrangle(new Vector2(50,0), new Vector2(50,100), new Vector2(100,100));
+        for (var i = 0; i < teddyObj.length; i += 3 * 3) {
+            drawTrangle(new Vector2(teddyObj[i], teddyObj[i + 1]), new Vector2(teddyObj[i + 3], teddyObj[i + 4]), new Vector2(teddyObj[i + 6], teddyObj[i + 7]));
+        }
     </script>
 </body>
