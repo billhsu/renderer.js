@@ -24,8 +24,9 @@
     <script src="js/renderer.js"></script>
     <script src="js/teddy.js"></script>
     <script>
+        var renderer = new Renderer(800, 600)
         for (var i = 0; i < teddyObj.length; i += 3 * 3) {
-            drawTrangle(new Vector(teddyObj[i], teddyObj[i + 1]),
+            renderer.drawTrangle(new Vector(teddyObj[i], teddyObj[i + 1]),
                 new Vector(teddyObj[i + 3], teddyObj[i + 4]),
                 new Vector(teddyObj[i + 6], teddyObj[i + 7]),
                 getRandomColor());
