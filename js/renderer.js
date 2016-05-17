@@ -9,6 +9,7 @@ function Renderer(width, height) {
     this.width = width;
     this.height = height;
     this.zbuffer = [];
+    this.viewportMatrix = this.viewport(0, 0)
     this.clearBuffer(this.zbuffer)
 }
 Renderer.prototype = {
@@ -41,6 +42,32 @@ Renderer.prototype = {
         for (var i = 0; i < this.width * this.height; ++i) {
             buffer[i] = 0
         }
+    },
+    viewport: function(x, y) {
+        var matrix = new Matrix();
+        matrix[0] = this.width / 2;
+        matrix[1] = 0;
+        matrix[2] = 0;
+        matrix[3] = x + this.width / 2;
+        matrix[4] = 0;
+        matrix[5] = this.height / 2;
+        matrix[6] = 0;
+        matrix[7] = y + this.height / 2;
+        matrix[8] = 0;
+        matrix[9] = 0;
+        matrix[10] = 0;
+        matrix[11] = 1;
+        matrix[12] = 0;
+        matrix[13] = 0;
+        matrix[14] = 0;
+        matrix[15] = 1;
+        return matrix;
+    },
+    resize: function(width, height) {
+        this.width = width
+        this.height = height
+        this.clearBuffer(this.zbuffer)
+        this.viewportMatrix = this.viewport(0, 0)
     }
 }
 
