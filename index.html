@@ -26,10 +26,16 @@
     <script src="js/teddy.js"></script>
     <script>
         var renderer = new Renderer(800, 600)
+        for (var i = 0; i < teddyObj.length; i += 1) {
+            teddyObj[i] /= 25;
+        }
+        var projectionMatrix = renderer.project(60, 0, 100);
+        var lookatMatrix = renderer.lookat(new Vector(0,0,2), new Vector(0,0,0), new Vector(0,1,0));
+        var modelView = projectionMatrix.multiply(lookatMatrix);
         for (var i = 0; i < teddyObj.length; i += 3 * 3) {
-            renderer.drawTrangle(new Vector(teddyObj[i], teddyObj[i + 1]),
-                new Vector(teddyObj[i + 3], teddyObj[i + 4]),
-                new Vector(teddyObj[i + 6], teddyObj[i + 7]),
+            renderer.drawTrangle(modelView.transformPoint(new Vector(teddyObj[i], teddyObj[i + 1])),
+                modelView.transformPoint(new Vector(teddyObj[i + 3], teddyObj[i + 4])),
+                modelView.transformPoint(new Vector(teddyObj[i + 6], teddyObj[i + 7])),
                 getRandomColor());
         }
 
