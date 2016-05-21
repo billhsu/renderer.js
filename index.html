@@ -27,7 +27,7 @@
     <script>
         var renderer = new Renderer(800, 600)
         var projectionMatrix = renderer.project(60, 0, 1000);
-        var lookatMatrix = renderer.lookat(new Vector(0,0,40), new Vector(0,0,0), new Vector(0,1,0));
+        var lookatMatrix = renderer.lookat(new Vector(0,0,45), new Vector(0,0,0), new Vector(0,1,0));
         var modelView = projectionMatrix.multiply(lookatMatrix);
         for (var i = 0; i < teddyObj.length; i += 3 * 3) {
             renderer.drawTrangle(modelView.transformPoint(new Vector(teddyObj[i], teddyObj[i + 1], teddyObj[i + 2])),
