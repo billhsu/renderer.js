@@ -25,15 +25,37 @@
     <script src="js/renderer.js"></script>
     <script src="js/teddy.js"></script>
     <script>
-        var renderer = new Renderer(800, 600)
-        var projectionMatrix = renderer.project(60, 0, 1000);
-        var lookatMatrix = renderer.lookat(new Vector(0,0,45), new Vector(0,0,0), new Vector(0,1,0));
+        var canvasWidth = 800;
+        var canvasHeight = 600;
+        var renderer = new Renderer(canvasWidth, canvasHeight)
+        var projectionMatrix = renderer.project(60, 10, 1000);
+        var lookatMatrix = renderer.lookat(new Vector(0, 0, 40), new Vector(0, 0, 0), new Vector(0, 1, 0));
         var modelView = projectionMatrix.multiply(lookatMatrix);
         for (var i = 0; i < teddyObj.length; i += 3 * 3) {
-            renderer.drawTrangle(modelView.transformPoint(new Vector(teddyObj[i], teddyObj[i + 1], teddyObj[i + 2])),
-                modelView.transformPoint(new Vector(teddyObj[i + 3], teddyObj[i + 4], teddyObj[i + 5])),
-                modelView.transformPoint(new Vector(teddyObj[i + 6], teddyObj[i + 7], teddyObj[i + 8])),
+            renderer.drawTriangle([modelView.transformPoint(new Vector(teddyObj[i], teddyObj[i + 1], teddyObj[i + 2])),
+                    modelView.transformPoint(new Vector(teddyObj[i + 3], teddyObj[i + 4], teddyObj[i + 5])),
+                    modelView.transformPoint(new Vector(teddyObj[i + 6], teddyObj[i + 7], teddyObj[i + 8]))
+                ],
                 getRandomColor());
+        }
+
+        var canvas = document.getElementById('canvas');
+        if (canvas.getContext) {
+            var ctx = canvas.getContext('2d');
+            var canvasData = ctx.createImageData(canvasWidth, canvasHeight);
+            for (var x = 0; x < canvasWidth; ++x) {
+                for (var y = 0; y < canvasHeight; ++y) {
+                    var index = (x + y * canvasWidth) * 4;
+                    var rgba = renderer.getBuffer(renderer.imageBuffer, x, y);
+                    if (rgba instanceof Vector) {
+                        canvasData.data[index + 0] = rgba.x;
+                        canvasData.data[index + 1] = rgba.y;
+                        canvasData.data[index + 2] = rgba.z;
+                        canvasData.data[index + 3] = rgba.w;
+                    }
+                }
+            }
+            ctx.putImageData(canvasData, 0, 0);
         }
 
         function getRandomColor() {

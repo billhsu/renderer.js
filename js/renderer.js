@@ -9,16 +9,17 @@ function Renderer(width, height) {
     this.width = width;
     this.height = height;
     this.zbuffer = [];
+    this.imageBuffer = [];
     this.viewportMatrix = this.viewport(0, 0);
     this.clearBuffer(this.zbuffer);
 }
 Renderer.prototype = {
-    drawTrangle: function(a, b, c, color) {
-        Renderer.drawTrangle(this.viewportMatrix, a, b, c, color);
+    drawTriangle: function(vertices, color) {
+        Renderer.drawTriangle(this, vertices, color);
     },
-    clearBuffer: function(buffer) {
+    clearBuffer: function(buffer, val) {
         for (var i = 0; i < this.width * this.height; ++i) {
-            buffer[i] = 0;
+            buffer[i] = val || 0;
         }
     },
     viewport: function(x, y) {
@@ -33,27 +34,46 @@ Renderer.prototype = {
     resize: function(width, height) {
         this.width = width;
         this.height = height;
-        this.clearBuffer(this.zbuffer);
+        this.clearBuffer(this.zbuffer, 255);
         this.viewportMatrix = this.viewport(0, 0);
+    },
+    setBuffer: function(buffer, x, y, val) {
+        buffer[y * this.width + x] = val;
+    },
+    getBuffer: function(buffer, x, y) {
+        return buffer[y * this.width + x];
     }
 }
-Renderer.drawTrangle = function(viewportMatrix, a, b, c, color) {
-    var ta = viewportMatrix.transformPoint(a);
-    ta = ta.divide(ta.w);
-    var tb = viewportMatrix.transformPoint(b);
-    tb = tb.divide(tb.w);
-    var tc = viewportMatrix.transformPoint(c);
-    tc = tc.divide(tc.w);
-    var canvas = document.getElementById('canvas');
-    if (canvas.getContext) {
-        var ctx = canvas.getContext('2d');
-        ctx.beginPath();
-        ctx.moveTo(ta.x, ta.y);
-        ctx.lineTo(tb.x, tb.y);
-        ctx.lineTo(tc.x, tc.y);
-        ctx.closePath();
-        ctx.fillStyle = color;
-        ctx.fill();
+Renderer.drawTriangle = function(renderer, vertices, color) {
+    if (vertices.length != 3) {
+        console.log("vertices.length should be 3");
+        return;
+    }
+    for (var i = 0; i < 3; i += 1) {
+        vertices[i] = vertices[i].divide(vertices[i].w);
+        vertices[i] = renderer.viewportMatrix.transformPoint(vertices[i]);
+        vertices[i].x = Math.floor(vertices[i].x);
+        vertices[i].y = Math.floor(vertices[i].y);
+    }
+    var BBoxTopLeft = new Vector(Math.min(Math.min(vertices[0].x, vertices[1].x), vertices[2].x), Math.min(Math.min(vertices[0].y, vertices[1].y), vertices[2].y));
+    var BBoxBottomRight = new Vector(Math.max(Math.max(vertices[0].x, vertices[1].x), vertices[2].x), Math.max(Math.max(vertices[0].y, vertices[1].y), vertices[2].y));
+    for (var x = BBoxTopLeft.x; x <= BBoxBottomRight.x; ++x) {
+        for (var y = BBoxTopLeft.y; y <= BBoxBottomRight.y; ++y) {
+            var p = new Vector(x, y);
+            var barycentricCoord = Renderer.barycentric(vertices[0], vertices[1], vertices[2], p);
+            if (barycentricCoord.x<0 || barycentricCoord.y<0 || barycentricCoord.z<0) {
+                continue;
+            }
+            var depth = vertices[0].z * barycentricCoord.x + vertices[1].z * barycentricCoord.y + vertices[2].z * barycentricCoord.z;
+            if(depth<0) {depth = 0;}
+            if(depth>1) {depth = 1;}
+            depth = 1 - depth;
+            if (renderer.getBuffer(renderer.zbuffer, x, y) < depth) {
+                renderer.setBuffer(renderer.zbuffer, x, y, depth);
+                var val = Math.floor(depth * 255);
+                renderer.setBuffer(renderer.imageBuffer, x, y, new Vector(val, val, val, 255));
+            }
+        }
     }
 }
 
@@ -79,8 +99,8 @@ Renderer.viewport = function(x, y, width, height) {
     matrix.m[7] = y + height / 2;
     matrix.m[8] = 0;
     matrix.m[9] = 0;
-    matrix.m[10] = 0;
-    matrix.m[11] = 1;
+    matrix.m[10] = 0.5;
+    matrix.m[11] = 0.5;
     matrix.m[12] = 0;
     matrix.m[13] = 0;
     matrix.m[14] = 0;
@@ -90,22 +110,7 @@ Renderer.viewport = function(x, y, width, height) {
 
 Renderer.lookat = function(eye, center, up) {
     up = up.unit();
-    var f = center.subtract(eye).unit();
-    var s = f.cross(up);
-    var u = s.unit().cross(f);
-    var matrix = new Matrix();
-    matrix.m[0] = s.x;
-    matrix.m[1] = s.y;
-    matrix.m[2] = s.z;
-
-    matrix.m[4] = u.x;
-    matrix.m[5] = u.y;
-    matrix.m[6] = u.z;
-
-    matrix.m[8] = -f.x;
-    matrix.m[9] = -f.y;
-    matrix.m[10] = -f.z;
-    return matrix.translate(eye.negative());
+    return Matrix.lookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);
 }
 
 Renderer.project = function(fovy, zNear, zFar, width, height) {
