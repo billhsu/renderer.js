@@ -11,7 +11,7 @@ function Renderer(width, height) {
     this.zbuffer = [];
     this.imageBuffer = [];
     this.viewportMatrix = this.viewport(0, 0);
-    this.clearBuffer(this.zbuffer);
+    this.clear();
 }
 Renderer.prototype = {
     drawTriangle: function(vertices, color) {
@@ -42,6 +42,10 @@ Renderer.prototype = {
     },
     getBuffer: function(buffer, x, y) {
         return buffer[y * this.width + x];
+    },
+    clear: function() {
+        this.clearBuffer(this.zbuffer);
+        this.clearBuffer(this.imageBuffer);
     }
 }
 Renderer.drawTriangle = function(renderer, vertices, color) {
