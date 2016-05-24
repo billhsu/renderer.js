@@ -27,10 +27,16 @@
     <script>
         var app = {};
         app.meshes = {};
+
         window.onload = function() {
             OBJ.downloadMeshes({
                 'jeep': 'obj/jeep/jeep.obj',
             }, startDemo);
+            var textureImage = new Image();
+            textureImage.width = 512;
+            textureImage.height = 512;
+            textureImage.src = "obj/jeep/jeep.jpg";
+            app.texture = getImageData(textureImage);
         }
         var canvasWidth = 800;
         var canvasHeight = 600;
@@ -46,8 +52,8 @@
             var modelView = projectionMatrix.multiply(lookatMatrix);
             for (var i = 0; i < app.meshes.jeep.indices.length; i += 3) {
                 renderer.drawTriangle([modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i])),
-                        modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i+1])),
-                        modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i+2]))
+                        modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i + 1])),
+                        modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i + 2]))
                     ],
                     getRandomColor());
             }
@@ -71,6 +77,7 @@
                 ctx.putImageData(canvasData, 0, 0);
             }
         }
+
         function startDemo(meshes) {
             app.meshes = meshes;
             demo();
@@ -78,9 +85,11 @@
                 demo();
             }, 1000);
         }
+
         function indexToVertex(index) {
-            return new Vector(app.meshes.jeep.vertices[index*3],app.meshes.jeep.vertices[index*3+1],app.meshes.jeep.vertices[index*3+2]);
+            return new Vector(app.meshes.jeep.vertices[index * 3], app.meshes.jeep.vertices[index * 3 + 1], app.meshes.jeep.vertices[index * 3 + 2]);
         }
+
         function getRandomColor() {
             var letters = '0123456789ABCDEF'.split('');
             var color = '#';
@@ -88,6 +97,15 @@
                 color += letters[Math.floor(Math.random() * 16)];
             }
             return color;
+        }
+
+        function getImageData(image) {
+            var canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            var context = canvas.getContext('2d');
+            context.drawImage(image, 0, 0);
+            return context.getImageData(0, 0, image.width, image.height);
         }
     </script>
 </body>
