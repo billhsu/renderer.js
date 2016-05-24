@@ -65,12 +65,16 @@ Renderer.drawTriangle = function(renderer, vertices, color) {
         for (var y = BBoxTopLeft.y; y <= BBoxBottomRight.y; ++y) {
             var p = new Vector(x, y);
             var barycentricCoord = Renderer.barycentric(vertices[0], vertices[1], vertices[2], p);
-            if (barycentricCoord.x<0 || barycentricCoord.y<0 || barycentricCoord.z<0) {
+            if (barycentricCoord.x < 0 || barycentricCoord.y < 0 || barycentricCoord.z < 0) {
                 continue;
             }
             var depth = vertices[0].z * barycentricCoord.x + vertices[1].z * barycentricCoord.y + vertices[2].z * barycentricCoord.z;
-            if(depth<0) {depth = 0;}
-            if(depth>1) {depth = 1;}
+            if (depth < 0) {
+                depth = 0;
+            }
+            if (depth > 1) {
+                depth = 1;
+            }
             depth = 1 - depth;
             if (renderer.getBuffer(renderer.zbuffer, x, y) < depth) {
                 renderer.setBuffer(renderer.zbuffer, x, y, depth);
@@ -127,4 +131,8 @@ Renderer.project = function(fovy, zNear, zFar, width, height) {
     matrix.m[11] = 2 * zFar * zNear / (zNear - zFar);
     matrix.m[14] = -1;
     return matrix;
+}
+
+Renderer.getTexturePixel = function(u, v) {
+    return app.texture.data[u + v * app.texture.width];
 }
