@@ -23,8 +23,15 @@
     <script src="js/vector.js"></script>
     <script src="js/matrix.js"></script>
     <script src="js/renderer.js"></script>
-    <script src="js/teddy.js"></script>
+    <script src="js/webgl-obj-loader/webgl-obj-loader.js"></script>
     <script>
+        var app = {};
+        app.meshes = {};
+        window.onload = function() {
+            OBJ.downloadMeshes({
+                'jeep': 'obj/jeep/jeep.obj',
+            }, startDemo);
+        }
         var canvasWidth = 800;
         var canvasHeight = 600;
         var renderer = new Renderer(canvasWidth, canvasHeight)
@@ -34,13 +41,13 @@
         function demo() {
             renderer.clear();
             var projectionMatrix = renderer.project(60, 10, 1000);
-            var lookatMatrix = renderer.lookat(new Vector(Math.sin(radius) * 40, 0, Math.cos(radius) * 40), new Vector(0, 0, 0), new Vector(0, 1, 0));
-            radius+=0.1;
+            var lookatMatrix = renderer.lookat(new Vector(Math.sin(radius) * 20, 10, Math.cos(radius) * 20), new Vector(0, 0, 0), new Vector(0, 1, 0));
+            radius += 0.1;
             var modelView = projectionMatrix.multiply(lookatMatrix);
-            for (var i = 0; i < teddyObj.length; i += 3 * 3) {
-                renderer.drawTriangle([modelView.transformPoint(new Vector(teddyObj[i], teddyObj[i + 1], teddyObj[i + 2])),
-                        modelView.transformPoint(new Vector(teddyObj[i + 3], teddyObj[i + 4], teddyObj[i + 5])),
-                        modelView.transformPoint(new Vector(teddyObj[i + 6], teddyObj[i + 7], teddyObj[i + 8]))
+            for (var i = 0; i < app.meshes.jeep.indices.length; i += 3) {
+                renderer.drawTriangle([modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i])),
+                        modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i+1])),
+                        modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i+2]))
                     ],
                     getRandomColor());
             }
@@ -64,8 +71,16 @@
                 ctx.putImageData(canvasData, 0, 0);
             }
         }
-        demo();
-        setInterval(function() {demo();}, 500);
+        function startDemo(meshes) {
+            app.meshes = meshes;
+            demo();
+            setInterval(function() {
+                demo();
+            }, 1000);
+        }
+        function indexToVertex(index) {
+            return new Vector(app.meshes.jeep.vertices[index*3],app.meshes.jeep.vertices[index*3+1],app.meshes.jeep.vertices[index*3+2]);
+        }
         function getRandomColor() {
             var letters = '0123456789ABCDEF'.split('');
             var color = '#';
