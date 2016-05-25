@@ -7,9 +7,8 @@ function Vector(x, y, z, w) {
     this.x = x || 0;
     this.y = y || 0;
     this.z = z || 0;
-    this.w = w || 1;
+    this.w = w || 0;
 }
-
 // ### Instance Methods
 // The methods `add()`, `subtract()`, `multiply()`, and `divide()` can all
 // take either a vector or a number as an argument.
@@ -49,7 +48,7 @@ Vector.prototype = {
         return this.x == v.x && this.y == v.y && this.z == v.z && this.w == v.w;
     },
     dot: function(v) {
-        return this.x * v.x + this.y * v.y + this.z * v.z;
+        return this.x * v.x + this.y * v.y + this.z * v.z + this.w * v.w;
     },
     cross: function(v) {
         return new Vector(this.y * v.z - this.z * v.y, this.z * v.x - this.x * v.z, this.x * v.y - this.y * v.x);
@@ -97,6 +96,7 @@ Vector.negative = function(a, b) {
     b.x = -a.x;
     b.y = -a.y;
     b.z = -a.z;
+    b.w = -a.w;
     return b;
 };
 Vector.add = function(a, b, c) {

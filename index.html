@@ -27,7 +27,8 @@
     <script>
         var app = {};
         app.meshes = {};
-
+        app.textures = {};
+        app.shaders = {};
         window.onload = function() {
             OBJ.downloadMeshes({
                 'jeep': 'obj/jeep/jeep.obj',
@@ -36,7 +37,14 @@
             textureImage.width = 512;
             textureImage.height = 512;
             textureImage.src = "obj/jeep/jeep.jpg";
-            app.texture = getImageData(textureImage);
+            app.textures.jeep = getImageData(textureImage);
+            app.shaders.vertexShader = function(input) {
+                var vert = new Vector(input[0], input[1], input[2], 1.0);
+                var projection = app.shaders.projectionMatrix;
+                var modelView = app.shaders.modelView;
+                app.shaders.varying_uv = [input[3], input[4]];
+                return projection.multiply(modelView).transformPoint(vert);
+            }
         }
         var canvasWidth = 800;
         var canvasHeight = 600;
@@ -46,16 +54,14 @@
 
         function demo() {
             renderer.clear();
-            var projectionMatrix = renderer.project(60, 10, 1000);
+            app.shaders.projectionMatrix = renderer.project(60, 10, 1000);
             var lookatMatrix = renderer.lookat(new Vector(Math.sin(radius) * 20, 10, Math.cos(radius) * 20), new Vector(0, 0, 0), new Vector(0, 1, 0));
+            app.shaders.modelView = lookatMatrix;
             radius += 0.1;
-            var modelView = projectionMatrix.multiply(lookatMatrix);
             for (var i = 0; i < app.meshes.jeep.indices.length; i += 3) {
-                renderer.drawTriangle([modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i])),
-                        modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i + 1])),
-                        modelView.transformPoint(indexToVertex(app.meshes.jeep.indices[i + 2]))
-                    ],
-                    getRandomColor());
+                renderer.drawTriangle([indexToVertexUV(app.meshes.jeep.indices[i]),
+                    indexToVertexUV(app.meshes.jeep.indices[i + 1]),
+                    indexToVertexUV(app.meshes.jeep.indices[i + 2])]);
             }
 
             var canvas = document.getElementById('canvas');
@@ -86,8 +92,14 @@
             }, 1000);
         }
 
-        function indexToVertex(index) {
-            return new Vector(app.meshes.jeep.vertices[index * 3], app.meshes.jeep.vertices[index * 3 + 1], app.meshes.jeep.vertices[index * 3 + 2]);
+        function indexToVertexUV(index) {
+            return [
+                app.meshes.jeep.vertices[index * 3],
+                app.meshes.jeep.vertices[index * 3 + 1],
+                app.meshes.jeep.vertices[index * 3 + 2],
+                app.meshes.jeep.textures[index * 2],
+                app.meshes.jeep.textures[index * 2 + 1]
+            ];
         }
 
         function getRandomColor() {

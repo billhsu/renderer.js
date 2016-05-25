@@ -48,21 +48,39 @@ Renderer.prototype = {
         this.clearBuffer(this.imageBuffer);
     }
 }
-Renderer.drawTriangle = function(renderer, vertices, color) {
-    if (vertices.length != 3) {
-        console.log("vertices.length should be 3");
-        return;
-    }
-    for (var i = 0; i < 3; i += 1) {
+Renderer.drawTriangle = function(renderer, input, shader) {
+    var vertices = [];
+    for (var i = 0; i < input.length; i += 1) {
+        vertices[i] = app.shaders.vertexShader(input[i]);
         vertices[i] = vertices[i].divide(vertices[i].w);
         vertices[i] = renderer.viewportMatrix.transformPoint(vertices[i]);
         vertices[i].x = Math.floor(vertices[i].x);
         vertices[i].y = Math.floor(vertices[i].y);
     }
-    var BBoxTopLeft = new Vector(Math.min(Math.min(vertices[0].x, vertices[1].x), vertices[2].x), Math.min(Math.min(vertices[0].y, vertices[1].y), vertices[2].y));
-    var BBoxBottomRight = new Vector(Math.max(Math.max(vertices[0].x, vertices[1].x), vertices[2].x), Math.max(Math.max(vertices[0].y, vertices[1].y), vertices[2].y));
-    for (var x = BBoxTopLeft.x; x <= BBoxBottomRight.x; ++x) {
-        for (var y = BBoxTopLeft.y; y <= BBoxBottomRight.y; ++y) {
+    if (vertices.length != 3) {
+        console.log("vertices.length has to be 3.");
+        return;
+    }
+    var xMin = vertices[0].x,
+        xMax = vertices[0].x;
+    var yMin = vertices[0].y,
+        yMax = vertices[0].y;
+    for (var i = 1; i < vertices.length; ++i) {
+        if (xMin > vertices[i].x) {
+            xMin = vertices[i].x
+        }
+        if (xMax < vertices[i].x) {
+            xMax = vertices[i].x;
+        }
+        if (yMin > vertices[i].y) {
+            yMin = vertices[i].y
+        }
+        if (yMax < vertices[i].y) {
+            yMax = vertices[i].y;
+        }
+    }
+    for (var x = xMin; x <= xMax; ++x) {
+        for (var y = yMin; y <= yMax; ++y) {
             var p = new Vector(x, y);
             var barycentricCoord = Renderer.barycentric(vertices[0], vertices[1], vertices[2], p);
             if (barycentricCoord.x < 0 || barycentricCoord.y < 0 || barycentricCoord.z < 0) {
@@ -133,6 +151,6 @@ Renderer.project = function(fovy, zNear, zFar, width, height) {
     return matrix;
 }
 
-Renderer.getTexturePixel = function(u, v) {
-    return app.texture.data[u + v * app.texture.width];
+Renderer.getTexturePixel = function(texture, u, v) {
+    return texture.data[u + v * texture.width];
 }
