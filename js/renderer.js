@@ -96,6 +96,7 @@ Renderer.drawTriangle = function(renderer, input, shader) {
             depth = 1 - depth;
             if (renderer.getBuffer(renderer.zbuffer, x, y) < depth) {
                 renderer.setBuffer(renderer.zbuffer, x, y, depth);
+                var val  = Math.floor(depth * 255);
                 renderer.setBuffer(renderer.imageBuffer, x, y, shader.fragmentShader(barycentricCoord));
             }
         }
@@ -149,10 +150,14 @@ Renderer.project = function(fovy, zNear, zFar, width, height) {
     matrix.m[14] = -1;
     return matrix;
 }
-
 Renderer.getTexturePixel = function(texture, u, v) {
+    if (u > 1) u = 1;
+    if (u < 0) u = 0;
+    if (v > 1) v = 1;
+    if (v < 0) v = 0;
+    v = 1 - v;
     u = Math.floor(u * texture.width);
-    v= Math.floor(v*texture.height);
+    v = Math.floor(v * texture.height);
     var index = (u + v * texture.width) * 4;
     return [
         texture.data[index],

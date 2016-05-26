@@ -16,6 +16,9 @@
                 Your browser does not support the HTML5 canvas tag.
             </canvas>
         </div>
+        <!-- just to make sure the texture is loaded before starting rendering -->
+        <img src="obj/jeep/jeep.jpg" width="0px" height="0px"/>
+        <img src="obj/cube/cube.jpg" width="0px" height="0px"/>
     </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
@@ -32,12 +35,18 @@
         window.onload = function() {
             OBJ.downloadMeshes({
                 'jeep': 'obj/jeep/jeep.obj',
+                'cube': 'obj/cube/cube.obj',
             }, startDemo);
-            var textureImage = new Image();
-            textureImage.width = 512;
-            textureImage.height = 512;
-            textureImage.src = "obj/jeep/jeep.jpg";
-            app.textures.jeep = getImageData(textureImage);
+            var textureImageJeep = new Image();
+            textureImageJeep.width = 512;
+            textureImageJeep.height = 512;
+            textureImageJeep.src = "obj/jeep/jeep.jpg";
+            app.textures.jeep = getImageData(textureImageJeep);
+            var textureImageCube = new Image();
+            textureImageCube.width = 512;
+            textureImageCube.height = 512;
+            textureImageCube.src = "obj/jeep/jeep.jpg";
+            app.textures.cube = getImageData(textureImageCube);
             app.shader.varying_uv = [];
             app.shader.vertexShader = function(input) {
                 var result = [];
@@ -46,18 +55,26 @@
                     var vert = new Vector(current[0], current[1], current[2], 1.0);
                     var projection = app.shader.projectionMatrix;
                     var modelView = app.shader.modelView;
-                    app.shader.varying_uv[i] = [current[3], current[4]];
                     result[i] = projection.multiply(modelView).transformPoint(vert);
+                    app.shader.varying_uv[i] = [current[3], current[4], result[i].w];
                 }
                 return result;
             }
             app.shader.fragmentShader = function(barycentricCoord) {
-                var u = app.shader.varying_uv[0][0] * barycentricCoord.x + app.shader.varying_uv[1][0] * barycentricCoord.y + app.shader.varying_uv[2][0] * barycentricCoord.z;
-                var v = app.shader.varying_uv[0][1] * barycentricCoord.x + app.shader.varying_uv[1][1] * barycentricCoord.y + app.shader.varying_uv[2][1] * barycentricCoord.z;
+                var u = (app.shader.varying_uv[0][0] * barycentricCoord.x / app.shader.varying_uv[0][2] + app.shader.varying_uv[1][0] * barycentricCoord.y / app.shader.varying_uv[1][2] + app.shader.varying_uv[2][0] * barycentricCoord.z / app.shader.varying_uv[2][2])/(barycentricCoord.x / app.shader.varying_uv[0][2] + barycentricCoord.y / app.shader.varying_uv[1][2] + barycentricCoord.z / app.shader.varying_uv[2][2]);
+                var v = (app.shader.varying_uv[0][1] * barycentricCoord.x / app.shader.varying_uv[0][2] + app.shader.varying_uv[1][1] * barycentricCoord.y / app.shader.varying_uv[1][2] + app.shader.varying_uv[2][1] * barycentricCoord.z / app.shader.varying_uv[2][2])/(barycentricCoord.x / app.shader.varying_uv[0][2] + barycentricCoord.y / app.shader.varying_uv[1][2] + barycentricCoord.z / app.shader.varying_uv[2][2]);
                 var color = Renderer.getTexturePixel(app.textures.jeep, u, v);
                 return new Vector(color[0], color[1], color[2], color[3]);
             }
         }
+        function startDemo(meshes) {
+            app.meshes = meshes;
+            demo();
+            setInterval(function() {
+                demo();
+            }, 2000);
+        }
+
         var canvasWidth = 800;
         var canvasHeight = 600;
         var renderer = new Renderer(canvasWidth, canvasHeight)
@@ -66,14 +83,14 @@
 
         function demo() {
             renderer.clear();
-            app.shader.projectionMatrix = renderer.project(60, 10, 1000);
-            var lookatMatrix = renderer.lookat(new Vector(Math.sin(radius) * 20, 10, Math.cos(radius) * 20), new Vector(0, 0, 0), new Vector(0, 1, 0));
+            app.shader.projectionMatrix = renderer.project(60, 0, 1000);
+            var lookatMatrix = renderer.lookat(new Vector(Math.sin(radius) * 1, 0.5, Math.cos(radius) * 1), new Vector(0, 0, 0), new Vector(0, 1, 0));
             app.shader.modelView = lookatMatrix;
             radius += 0.1;
-            for (var i = 0; i < app.meshes.jeep.indices.length; i += 3) {
-                renderer.drawTriangle([indexToVertexUV(app.meshes.jeep.indices[i]),
-                    indexToVertexUV(app.meshes.jeep.indices[i + 1]),
-                    indexToVertexUV(app.meshes.jeep.indices[i + 2])
+            for (var i = 0; i < app.meshes.cube.indices.length; i += 3) {
+                renderer.drawTriangle([indexToVertexUV(app.meshes.cube.indices[i]),
+                    indexToVertexUV(app.meshes.cube.indices[i + 1]),
+                    indexToVertexUV(app.meshes.cube.indices[i + 2])
                 ], app.shader);
             }
 
@@ -97,33 +114,15 @@
             }
         }
 
-        function startDemo(meshes) {
-            app.meshes = meshes;
-            demo();
-            setInterval(function() {
-                demo();
-            }, 2000);
-        }
-
         function indexToVertexUV(index) {
             return [
-                app.meshes.jeep.vertices[index * 3],
-                app.meshes.jeep.vertices[index * 3 + 1],
-                app.meshes.jeep.vertices[index * 3 + 2],
-                app.meshes.jeep.textures[index * 2],
-                app.meshes.jeep.textures[index * 2 + 1]
+                app.meshes.cube.vertices[index * 3],
+                app.meshes.cube.vertices[index * 3 + 1],
+                app.meshes.cube.vertices[index * 3 + 2],
+                app.meshes.cube.textures[index * 2],
+                app.meshes.cube.textures[index * 2 + 1]
             ];
         }
-
-        function getRandomColor() {
-            var letters = '0123456789ABCDEF'.split('');
-            var color = '#';
-            for (var i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
-        }
-
         function getImageData(image) {
             var canvas = document.createElement('canvas');
             canvas.width = image.width;
