@@ -84,13 +84,13 @@
         function demo() {
             renderer.clear();
             app.shader.projectionMatrix = renderer.project(60, 0, 1000);
-            var lookatMatrix = renderer.lookat(new Vector(Math.sin(radius) * 1, 0.5, Math.cos(radius) * 1), new Vector(0, 0, 0), new Vector(0, 1, 0));
+            var lookatMatrix = renderer.lookat(new Vector(Math.sin(radius) * 20, 10, Math.cos(radius) * 20), new Vector(0, 0, 0), new Vector(0, 1, 0));
             app.shader.modelView = lookatMatrix;
             radius += 0.1;
-            for (var i = 0; i < app.meshes.cube.indices.length; i += 3) {
-                renderer.drawTriangle([indexToVertexUV(app.meshes.cube.indices[i]),
-                    indexToVertexUV(app.meshes.cube.indices[i + 1]),
-                    indexToVertexUV(app.meshes.cube.indices[i + 2])
+            for (var i = 0; i < app.meshes.jeep.indices.length; i += 3) {
+                renderer.drawTriangle([indexToVertexUV(app.meshes.jeep.indices[i]),
+                    indexToVertexUV(app.meshes.jeep.indices[i + 1]),
+                    indexToVertexUV(app.meshes.jeep.indices[i + 2])
                 ], app.shader);
             }
 
@@ -116,11 +116,11 @@
 
         function indexToVertexUV(index) {
             return [
-                app.meshes.cube.vertices[index * 3],
-                app.meshes.cube.vertices[index * 3 + 1],
-                app.meshes.cube.vertices[index * 3 + 2],
-                app.meshes.cube.textures[index * 2],
-                app.meshes.cube.textures[index * 2 + 1]
+                app.meshes.jeep.vertices[index * 3],
+                app.meshes.jeep.vertices[index * 3 + 1],
+                app.meshes.jeep.vertices[index * 3 + 2],
+                app.meshes.jeep.textures[index * 2],
+                app.meshes.jeep.textures[index * 2 + 1]
             ];
         }
         function getImageData(image) {
