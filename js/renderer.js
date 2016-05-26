@@ -14,8 +14,8 @@ function Renderer(width, height) {
     this.clear();
 }
 Renderer.prototype = {
-    drawTriangle: function(vertices, color) {
-        Renderer.drawTriangle(this, vertices, color);
+    drawTriangle: function(vertices, shader) {
+        Renderer.drawTriangle(this, vertices, shader);
     },
     clearBuffer: function(buffer, val) {
         for (var i = 0; i < this.width * this.height; ++i) {
@@ -49,18 +49,18 @@ Renderer.prototype = {
     }
 }
 Renderer.drawTriangle = function(renderer, input, shader) {
-    var vertices = [];
-    for (var i = 0; i < input.length; i += 1) {
-        vertices[i] = app.shaders.vertexShader(input[i]);
+    if (input.length != 3) {
+        console.log("input.length has to be 3.");
+        return;
+    }
+    var vertices = shader.vertexShader([input[0], input[1], input[2]]);
+    for (var i = 0; i < vertices.length; i += 1) {
         vertices[i] = vertices[i].divide(vertices[i].w);
         vertices[i] = renderer.viewportMatrix.transformPoint(vertices[i]);
         vertices[i].x = Math.floor(vertices[i].x);
         vertices[i].y = Math.floor(vertices[i].y);
     }
-    if (vertices.length != 3) {
-        console.log("vertices.length has to be 3.");
-        return;
-    }
+
     var xMin = vertices[0].x,
         xMax = vertices[0].x;
     var yMin = vertices[0].y,
@@ -96,8 +96,7 @@ Renderer.drawTriangle = function(renderer, input, shader) {
             depth = 1 - depth;
             if (renderer.getBuffer(renderer.zbuffer, x, y) < depth) {
                 renderer.setBuffer(renderer.zbuffer, x, y, depth);
-                var val = Math.floor(depth * 255);
-                renderer.setBuffer(renderer.imageBuffer, x, y, new Vector(val, val, val, 255));
+                renderer.setBuffer(renderer.imageBuffer, x, y, shader.fragmentShader(barycentricCoord));
             }
         }
     }
@@ -152,5 +151,13 @@ Renderer.project = function(fovy, zNear, zFar, width, height) {
 }
 
 Renderer.getTexturePixel = function(texture, u, v) {
-    return texture.data[u + v * texture.width];
+    u = Math.floor(u * texture.width);
+    v= Math.floor(v*texture.height);
+    var index = (u + v * texture.width) * 4;
+    return [
+        texture.data[index],
+        texture.data[index + 1],
+        texture.data[index + 2],
+        texture.data[index + 3]
+    ];
 }
