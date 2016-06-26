@@ -81,7 +81,7 @@ Renderer.drawTriangle = function(renderer, input, shader) {
             depth = 1 - depth;
             if (renderer.getBuffer(renderer.zbuffer, x, y) < depth) {
                 renderer.setBuffer(renderer.zbuffer, x, y, depth);
-                var val  = Math.floor(depth * 255);
+                var val = Math.floor(depth * 255);
                 renderer.setBuffer(renderer.imageBuffer, x, y, shader.fragmentShader(barycentricCoord));
             }
         }
@@ -153,9 +153,9 @@ Renderer.getTexturePixel = function(texture, u, v) {
 }
 Renderer.getBoundingBox = function(vertices) {
     var xMin = vertices[0].x,
-    yMin = vertices[0].y;
+        yMin = vertices[0].y;
     var xMax = vertices[0].x,
-    yMax = vertices[0].y;
+        yMax = vertices[0].y;
     for (var i = 1; i < vertices.length; ++i) {
         xMin = Math.floor(Math.min(xMin, vertices[i].x));
         xMax = Math.ceil(Math.max(xMax, vertices[i].x));

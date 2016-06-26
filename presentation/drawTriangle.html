@@ -21,96 +21,96 @@
     <script src="../js/vector.js"></script>
     <script src="../js/matrix.js"></script>
     <script>
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
-        var canvasWidth = 800;
-        var canvasHeight = 600;
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var canvasWidth = 800;
+    var canvasHeight = 600;
 
-        var canvasData = ctx.createImageData(canvasWidth, canvasHeight);
+    var canvasData = ctx.createImageData(canvasWidth, canvasHeight);
 
-        drawTriangle([new Vector(0.5, 0.5, 0.9), new Vector(0.5, -0.5, 0.9), new Vector(-0.5, 0.5, 0.3)])
-        updateFrame();
+    drawTriangle([new Vector(0.5, 0.5, 0.9), new Vector(0.5, -0.5, 0.9), new Vector(-0.5, 0.5, 0.3)])
+    updateFrame();
 
-        function drawTriangle(vertices) {
-            for (var i = 0; i < vertices.length; ++i) {
-                vertices[i] = mapToScreen(vertices[i])
-            }
-            if (vertices.length != 3) {
-                console.log("Input invalid.");
-                return;
-            }
-            var boundingBox = getBoundingBox(vertices);
-            for (var x = boundingBox[0]; x <= boundingBox[2]; x += 1) {
-                for (var y = boundingBox[1]; y <= boundingBox[3]; y += 1) {
-                    if (isInsideTriangle(vertices, x, y)) {
-                        var barycentricCoord = getBaryCentricCoord(vertices, x, y);
-                        var depth = Math.floor(interpolate(vertices, barycentricCoord).z * 255);
-                        drawPixel(x, y, depth, depth, depth, 255);
-                    }
+    function drawTriangle(vertices) {
+        for (var i = 0; i < vertices.length; ++i) {
+            vertices[i] = mapToScreen(vertices[i])
+        }
+        if (vertices.length != 3) {
+            console.log("Input invalid.");
+            return;
+        }
+        var boundingBox = getBoundingBox(vertices);
+        for (var x = boundingBox[0]; x <= boundingBox[2]; x += 1) {
+            for (var y = boundingBox[1]; y <= boundingBox[3]; y += 1) {
+                if (isInsideTriangle(vertices, x, y)) {
+                    var barycentricCoord = getBaryCentricCoord(vertices, x, y);
+                    var depth = Math.floor(interpolate(vertices, barycentricCoord).z * 255);
+                    drawPixel(x, y, depth, depth, depth, 255);
                 }
             }
         }
+    }
 
-        function mapToScreen(vector) {
-            // range of vector.x is (-1, 1)
-            // range of (vector.x +1) is (0, 2)
-            var xScreen = (vector.x + 1) * canvasWidth / 2;
-            // y axis is different
-            var yScreen = (-vector.y + 1) * canvasHeight / 2;
-            return new Vector(xScreen, yScreen, vector.z);
-        }
+    function mapToScreen(vector) {
+        // range of vector.x is (-1, 1)
+        // range of (vector.x +1) is (0, 2)
+        var xScreen = (vector.x + 1) * canvasWidth / 2;
+        // y axis is different
+        var yScreen = (-vector.y + 1) * canvasHeight / 2;
+        return new Vector(xScreen, yScreen, vector.z);
+    }
 
-        function getBoundingBox(vertices) {
-            var xMin = vertices[0].x,
-                yMin = vertices[0].y;
-            var xMax = vertices[0].x,
-                yMax = vertices[0].y;
-            for (var i = 1; i < vertices.length; ++i) {
-                xMin = Math.min(xMin, vertices[i].x);
-                xMax = Math.max(xMax, vertices[i].x);
-                yMin = Math.min(yMin, vertices[i].y);
-                yMax = Math.max(yMax, vertices[i].y);
-            }
-            return [xMin, yMin, xMax, yMax];
+    function getBoundingBox(vertices) {
+        var xMin = vertices[0].x,
+            yMin = vertices[0].y;
+        var xMax = vertices[0].x,
+            yMax = vertices[0].y;
+        for (var i = 1; i < vertices.length; ++i) {
+            xMin = Math.min(xMin, vertices[i].x);
+            xMax = Math.max(xMax, vertices[i].x);
+            yMin = Math.min(yMin, vertices[i].y);
+            yMax = Math.max(yMax, vertices[i].y);
         }
+        return [xMin, yMin, xMax, yMax];
+    }
 
-        function drawPixel(x, y, r, g, b, a) {
-            var index = (x + y * canvasWidth) * 4;
-            canvasData.data[index + 0] = r;
-            canvasData.data[index + 1] = g;
-            canvasData.data[index + 2] = b;
-            canvasData.data[index + 3] = a;
-        }
+    function drawPixel(x, y, r, g, b, a) {
+        var index = (x + y * canvasWidth) * 4;
+        canvasData.data[index + 0] = r;
+        canvasData.data[index + 1] = g;
+        canvasData.data[index + 2] = b;
+        canvasData.data[index + 3] = a;
+    }
 
-        function updateFrame() {
-            ctx.putImageData(canvasData, 0, 0);
-        }
+    function updateFrame() {
+        ctx.putImageData(canvasData, 0, 0);
+    }
 
-        function interpolate(vertices, barycentricCoord) {
-            var x = vertices[0].x * barycentricCoord.x + vertices[1].x * barycentricCoord.y + vertices[2].x * barycentricCoord.z;
-            var y = vertices[0].y * barycentricCoord.x + vertices[1].y * barycentricCoord.y + vertices[2].y * barycentricCoord.z;
-            var z = vertices[0].z * barycentricCoord.x + vertices[1].z * barycentricCoord.y + vertices[2].z * barycentricCoord.z;
-            return new Vector(x, y, z);
-        }
+    function interpolate(vertices, barycentricCoord) {
+        var x = vertices[0].x * barycentricCoord.x + vertices[1].x * barycentricCoord.y + vertices[2].x * barycentricCoord.z;
+        var y = vertices[0].y * barycentricCoord.x + vertices[1].y * barycentricCoord.y + vertices[2].y * barycentricCoord.z;
+        var z = vertices[0].z * barycentricCoord.x + vertices[1].z * barycentricCoord.y + vertices[2].z * barycentricCoord.z;
+        return new Vector(x, y, z);
+    }
 
-        function isInsideTriangle(vertices, x, y) {
-            var barycentricCoord = getBaryCentricCoord(vertices, x, y);
-            return barycentricCoord.x >= 0 && barycentricCoord.y >= 0 && barycentricCoord.z >= 0;
-        }
+    function isInsideTriangle(vertices, x, y) {
+        var barycentricCoord = getBaryCentricCoord(vertices, x, y);
+        return barycentricCoord.x >= 0 && barycentricCoord.y >= 0 && barycentricCoord.z >= 0;
+    }
 
-        function getBaryCentricCoord(vertices, x, y) {
-            return barycentric(vertices[0], vertices[1], vertices[2], new Vector(x, y));
-        }
+    function getBaryCentricCoord(vertices, x, y) {
+        return barycentric(vertices[0], vertices[1], vertices[2], new Vector(x, y));
+    }
 
-        function barycentric(a, b, c, p) {
-            var s0 = new Vector(c.x - a.x, b.x - a.x, a.x - p.x);
-            var s1 = new Vector(c.y - a.y, b.y - a.y, a.y - p.y);
-            var u = s0.cross(s1);
-            if (Math.abs(u.z) > 1e-2) {
-                return new Vector(1 - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
-            }
-            return new Vector(-1, 1, 1);
+    function barycentric(a, b, c, p) {
+        var s0 = new Vector(c.x - a.x, b.x - a.x, a.x - p.x);
+        var s1 = new Vector(c.y - a.y, b.y - a.y, a.y - p.y);
+        var u = s0.cross(s1);
+        if (Math.abs(u.z) > 1e-2) {
+            return new Vector(1 - (u.x + u.y) / u.z, u.y / u.z, u.x / u.z);
         }
+        return new Vector(-1, 1, 1);
+    }
     </script>
 </body>
 
