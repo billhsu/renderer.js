@@ -57,28 +57,13 @@ Renderer.drawTriangle = function(renderer, input, shader) {
     for (var i = 0; i < vertices.length; i += 1) {
         vertices[i] = vertices[i].divide(vertices[i].w);
         vertices[i] = renderer.viewportMatrix.transformPoint(vertices[i]);
-        vertices[i].x = Math.floor(vertices[i].x);
-        vertices[i].y = Math.floor(vertices[i].y);
     }
 
-    var xMin = vertices[0].x,
-        xMax = vertices[0].x;
-    var yMin = vertices[0].y,
-        yMax = vertices[0].y;
-    for (var i = 1; i < vertices.length; ++i) {
-        if (xMin > vertices[i].x) {
-            xMin = vertices[i].x
-        }
-        if (xMax < vertices[i].x) {
-            xMax = vertices[i].x;
-        }
-        if (yMin > vertices[i].y) {
-            yMin = vertices[i].y
-        }
-        if (yMax < vertices[i].y) {
-            yMax = vertices[i].y;
-        }
-    }
+    var boundingBox = Renderer.getBoundingBox(vertices);
+    var xMin = boundingBox[0];
+    var yMin = boundingBox[1];
+    var xMax = boundingBox[2];
+    var yMax = boundingBox[3];
     for (var x = xMin; x <= xMax; ++x) {
         for (var y = yMin; y <= yMax; ++y) {
             var p = new Vector(x, y);
@@ -165,4 +150,17 @@ Renderer.getTexturePixel = function(texture, u, v) {
         texture.data[index + 2],
         texture.data[index + 3]
     ];
+}
+Renderer.getBoundingBox = function(vertices) {
+    var xMin = vertices[0].x,
+    yMin = vertices[0].y;
+    var xMax = vertices[0].x,
+    yMax = vertices[0].y;
+    for (var i = 1; i < vertices.length; ++i) {
+        xMin = Math.floor(Math.min(xMin, vertices[i].x));
+        xMax = Math.ceil(Math.max(xMax, vertices[i].x));
+        yMin = Math.floor(Math.min(yMin, vertices[i].y));
+        yMax = Math.ceil(Math.max(yMax, vertices[i].y));
+    }
+    return [xMin, yMin, xMax, yMax];
 }
